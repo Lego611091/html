@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Game Launcher</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  #search {
+    width: 100%;
+    padding: 12px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 20px;
+  }
+  .game-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .game-item {
+    background: #222;
+    padding: 12px;
+    border-radius: 8px;
+  }
+  .game-item a {
+    color: #4af;
+    text-decoration: none;
+    font-size: 18px;
+  }
+  .game-item a:hover {
+    text-decoration: underline;
+  }
+</style>
+</head>
+<body>
+
+<h1>Game Launcher</h1>
+<input id="search" type="text" placeholder="Search games...">
+
+<div class="game-list" id="gameList"></div>
+
+<script>
+// Fetch all files from your GitHub repo
+fetch("https://api.github.com/repos/Lego611091/html/contents")
+  .then(res => res.json())
+  .then(files => {
+    const list = document.getElementById("gameList");
+
+    const htmlFiles = files.filter(f => f.name.endsWith(".html"));
+
+    htmlFiles.forEach(file => {
+      const item = document.createElement("div");
+      item.className = "game-item";
+
+      const link = document.createElement("a");
+      link.href = file.name;
+      link.textContent = file.name;
+
+      item.appendChild(link);
+      list.appendChild(item);
+    });
+
+    // Search filter
+    document.getElementById("search").addEventListener("input", function() {
+      const term = this.value.toLowerCase();
+      document.querySelectorAll(".game-item").forEach(item => {
+        const name = item.textContent.toLowerCase();
+        item.style.display = name.includes(term) ? "" : "none";
+      });
+    });
+  });
+</script>
+
+</body>
+</html>
