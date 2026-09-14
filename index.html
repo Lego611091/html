@@ -107,6 +107,7 @@
     font-weight: bold;
   }
 
+  /* Loading intro */
   #loadingOverlay {
     position: fixed;
     inset: 0;
@@ -116,18 +117,45 @@
     justify-content: center;
     flex-direction: column;
     z-index: 999;
+    animation: fadeOut 1s ease forwards;
+    animation-delay: 3s;
   }
-  .spinner {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    border: 4px solid #0ff;
-    border-top-color: transparent;
-    animation: spin 1s linear infinite;
-    box-shadow: 0 0 20px #0ff;
-    margin-bottom: 12px;
+
+  @keyframes fadeOut {
+    to { opacity: 0; visibility: hidden; }
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-bar {
+    width: 60%;
+    height: 12px;
+    background: #003;
+    border-radius: 999px;
+    overflow: hidden;
+    box-shadow: 0 0 12px #0ff;
+    margin-top: 20px;
+  }
+
+  .loading-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #0ff, #3cf);
+    animation: fillBar 3s ease forwards;
+  }
+
+  @keyframes fillBar {
+    to { width: 100%; }
+  }
+
+  .intro-text {
+    font-size: 26px;
+    text-shadow: 0 0 20px #0ff;
+    animation: glow 2s infinite alternate;
+  }
+
+  @keyframes glow {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -137,13 +165,13 @@
 <div class="stars3"></div>
 
 <div id="loadingOverlay">
-  <div class="spinner"></div>
-  <div style="color:#e6f7ff;">Loading games...</div>
+  <div class="intro-text">Launching Galaxy...</div>
+  <div class="loading-bar"><div class="loading-fill"></div></div>
 </div>
 
 <h1>Galaxy Game Launcher</h1>
 
-<input id="search" type="text" placeholder="Search numbers...">
+<input id="search" type="text" placeholder="Search numbers or names...">
 
 <div class="game-list" id="gameList"></div>
 
@@ -151,13 +179,10 @@
 const fallbackImg =
   "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80";
 
+/* Find cover image */
 async function findCover(base) {
   const folder = `https://raw.githubusercontent.com/Lego611091/assets/main/${base}/`;
-
-  const possible = [
-    "cover.png", "cover.jpg",
-    "icon.png", "icon.jpg"
-  ];
+  const possible = ["cover.png", "cover.jpg", "icon.png", "icon.jpg"];
 
   for (const file of possible) {
     try {
@@ -165,8 +190,26 @@ async function findCover(base) {
       if (res.ok) return folder + file;
     } catch {}
   }
-
   return fallbackImg;
+}
+
+/* Auto-detect name from inside HTML file */
+async function getNameFromHTML(filename, base) {
+  try {
+    const res = await fetch(filename);
+    if (!res.ok) return base;
+    const html = await res.text();
+
+    let match = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    if (match && match[1].trim()) return match[1].trim();
+
+    match = html.match(/<h1[^>]*>([^<]+)<\/h1>/i);
+    if (match && match[1].trim()) return match[1].trim();
+
+    return base;
+  } catch {
+    return base;
+  }
 }
 
 fetch("https://api.github.com/repos/Lego611091/html/contents")
@@ -178,6 +221,9 @@ fetch("https://api.github.com/repos/Lego611091/html/contents")
     for (const f of htmlFiles) {
       const base = f.name.replace(".html", "");
       const cover = await findCover(base);
+      const autoName = await getNameFromHTML(f.name, base);
+
+      const label = autoName !== base ? `${base} – ${autoName}` : base;
 
       const card = document.createElement("div");
       card.className = "game-item";
@@ -190,21 +236,19 @@ fetch("https://api.github.com/repos/Lego611091/html/contents")
 
       const title = document.createElement("div");
       title.className = "game-name";
-      title.textContent = base;
+      title.textContent = label;
 
       card.appendChild(img);
       card.appendChild(title);
       gameList.appendChild(card);
     }
-
-    document.getElementById("loadingOverlay").style.display = "none";
   });
 
 document.getElementById("search").addEventListener("input", function() {
   const term = this.value.toLowerCase();
   document.querySelectorAll(".game-item").forEach(item => {
-    const name = item.textContent.toLowerCase();
-    item.style.display = name.includes(term) ? "" : "none";
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(term) ? "" : "none";
   });
 });
 </script>
