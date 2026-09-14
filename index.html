@@ -114,21 +114,11 @@
     box-shadow: 0 0 18px #3cf55;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
-  .game-item::before {
-    content: "";
-    position: absolute;
-    inset: -40%;
-    background: radial-gradient(circle at top, #3cf55 0, transparent 60%);
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    pointer-events: none;
-  }
   .game-item:hover {
     transform: translateY(-4px) scale(1.03);
     box-shadow: 0 0 26px #5ff;
     border-color: #5ff;
   }
-  .game-item:hover::before { opacity: 0.35; }
 
   .game-thumb {
     width: 100%;
@@ -209,11 +199,6 @@
     color: #e6f7ff;
     text-shadow: 0 0 12px #3cf;
   }
-
-  @media (max-width: 600px) {
-    body { padding: 12px; }
-    h1 { font-size: 32px; }
-  }
 </style>
 </head>
 <body>
@@ -273,7 +258,7 @@ function guessCategory(name, filename) {
 
 function coverForGame(filename) {
   const base = filename.replace(/\.html$/i, "");
-  return `https://raw.githubusercontent.com/Lego611091/covers/main/${base}.png`;
+  return `https://raw.githubusercontent.com/Lego611091/assets/main/${base}/cover.png`;
 }
 
 fetch("https://api.github.com/repos/Lego611091/html/contents")
