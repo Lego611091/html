@@ -5,9 +5,7 @@
 <title>Galaxy Game Launcher</title>
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; }
 
   body {
     font-family: Arial, sans-serif;
@@ -18,7 +16,6 @@
     overflow-x: hidden;
   }
 
-  /* Animated stars */
   .stars, .stars2, .stars3 {
     position: fixed;
     top: 0;
@@ -82,10 +79,7 @@
     outline: none;
     box-shadow: 0 0 12px #3cf88;
   }
-
-  #search::placeholder {
-    color: #8fb3ff;
-  }
+  #search::placeholder { color: #8fb3ff; }
 
   .filter-select {
     padding: 8px 12px;
@@ -120,7 +114,6 @@
     box-shadow: 0 0 18px #3cf55;
     transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
-
   .game-item::before {
     content: "";
     position: absolute;
@@ -130,16 +123,12 @@
     transition: opacity 0.25s ease;
     pointer-events: none;
   }
-
   .game-item:hover {
     transform: translateY(-4px) scale(1.03);
     box-shadow: 0 0 26px #5ff;
     border-color: #5ff;
   }
-
-  .game-item:hover::before {
-    opacity: 0.35;
-  }
+  .game-item:hover::before { opacity: 0.35; }
 
   .game-thumb {
     width: 100%;
@@ -191,12 +180,8 @@
     text-decoration: none;
     text-shadow: 0 0 10px #3cf;
   }
+  .game-link:hover { text-decoration: underline; }
 
-  .game-link:hover {
-    text-decoration: underline;
-  }
-
-  /* Loading overlay */
   #loadingOverlay {
     position: fixed;
     inset: 0;
@@ -207,7 +192,6 @@
     flex-direction: column;
     z-index: 999;
   }
-
   .spinner {
     width: 70px;
     height: 70px;
@@ -219,11 +203,7 @@
     box-shadow: 0 0 20px #0ff;
     margin-bottom: 12px;
   }
-
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-
+  @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text {
     font-size: 16px;
     color: #e6f7ff;
@@ -231,19 +211,15 @@
   }
 
   @media (max-width: 600px) {
-    body {
-      padding: 12px;
-    }
-    h1 {
-      font-size: 32px;
-    }
+    body { padding: 12px; }
+    h1 { font-size: 32px; }
   }
 </style>
 </head>
 <body>
 
 <div class="stars"></div>
-div class="stars2"></div>
+<div class="stars2"></div>
 <div class="stars3"></div>
 
 <div id="loadingOverlay">
@@ -273,8 +249,8 @@ div class="stars2"></div>
 <div class="game-list" id="gameList"></div>
 
 <script>
-const placeholderBase =
-  "https://dummyimage.com/400x200/001133/ffffff.png&text=";
+const galaxyFallback =
+  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80";
 
 function prettyName(filename) {
   const base = filename.replace(/\.html$/i, "");
@@ -295,9 +271,9 @@ function guessCategory(name, filename) {
   return "Other";
 }
 
-function iconForGame(name) {
-  const text = encodeURIComponent(name || "Game");
-  return placeholderBase + text;
+function coverForGame(filename) {
+  const base = filename.replace(/\.html$/i, "");
+  return `https://raw.githubusercontent.com/Lego611091/covers/main/${base}.png`;
 }
 
 fetch("https://api.github.com/repos/Lego611091/html/contents")
@@ -308,13 +284,13 @@ fetch("https://api.github.com/repos/Lego611091/html/contents")
     const games = htmlFiles.map((f, index) => {
       const name = prettyName(f.name);
       const category = guessCategory(name, f.name);
-      const icon = iconForGame(name);
-      const isRecent = index >= htmlFiles.length - 12; // last 12 as "recent"
+      const cover = coverForGame(f.name);
+      const isRecent = index >= htmlFiles.length - 12;
       return {
         filename: f.name,
         name,
         category,
-        icon,
+        cover,
         isRecent
       };
     });
@@ -338,7 +314,8 @@ fetch("https://api.github.com/repos/Lego611091/html/contents")
 
         const img = document.createElement("img");
         img.className = "game-thumb";
-        img.src = game.icon;
+        img.src = game.cover;
+        img.onerror = () => { img.src = galaxyFallback; };
 
         const title = document.createElement("div");
         title.className = "game-name";
@@ -393,7 +370,6 @@ fetch("https://api.github.com/repos/Lego611091/html/contents")
     });
 
     renderLists();
-
     document.getElementById("loadingOverlay").style.display = "none";
   })
   .catch(err => {
