@@ -5,125 +5,400 @@
 <title>Galaxy Game Launcher</title>
 
 <style>
+  * {
+    box-sizing: border-box;
+  }
+
   body {
     font-family: Arial, sans-serif;
-    background: url('https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?auto=format&fit=crop&w=1950&q=80') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
+    background: radial-gradient(circle at top, #071b52 0, #02030a 40%, #000000 100%);
+    color: #e6f7ff;
     margin: 0;
     padding: 20px;
+    overflow-x: hidden;
+  }
+
+  /* Animated stars */
+  .stars, .stars2, .stars3 {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background-repeat: repeat;
+    pointer-events: none;
+    z-index: -1;
+  }
+  .stars {
+    background-image: radial-gradient(2px 2px at 20% 20%, #ffffff55, transparent),
+                      radial-gradient(1px 1px at 80% 30%, #7df, transparent),
+                      radial-gradient(1.5px 1.5px at 40% 80%, #4af, transparent);
+    animation: drift 80s linear infinite;
+  }
+  .stars2 {
+    background-image: radial-gradient(2px 2px at 10% 70%, #ffffff55, transparent),
+                      radial-gradient(1px 1px at 60% 40%, #7df, transparent),
+                      radial-gradient(1.5px 1.5px at 90% 10%, #4af, transparent);
+    animation: drift 120s linear infinite;
+    opacity: 0.7;
+  }
+  .stars3 {
+    background-image: radial-gradient(2px 2px at 30% 50%, #ffffff55, transparent),
+                      radial-gradient(1px 1px at 70% 90%, #7df, transparent),
+                      radial-gradient(1.5px 1.5px at 50% 20%, #4af, transparent);
+    animation: drift 160s linear infinite;
+    opacity: 0.4;
+  }
+  @keyframes drift {
+    from { transform: translate3d(0,0,0); }
+    to   { transform: translate3d(-25%, -25%, 0); }
   }
 
   h1 {
     text-align: center;
     font-size: 42px;
     margin-bottom: 10px;
-    text-shadow: 0 0 20px #7df;
+    text-shadow: 0 0 25px #3cf, 0 0 40px #0ff;
+    letter-spacing: 2px;
+  }
+
+  .top-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
   }
 
   #search {
-    width: 100%;
-    padding: 12px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    margin-bottom: 20px;
-    background: rgba(0,0,0,0.5);
-    color: #fff;
+    flex: 1 1 260px;
+    padding: 10px 14px;
+    font-size: 16px;
+    border-radius: 999px;
+    border: 1px solid #3cf;
+    background: rgba(3, 10, 30, 0.8);
+    color: #e6f7ff;
+    outline: none;
+    box-shadow: 0 0 12px #3cf88;
+  }
+
+  #search::placeholder {
+    color: #8fb3ff;
+  }
+
+  .filter-select {
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid #3cf;
+    background: rgba(3, 10, 30, 0.8);
+    color: #e6f7ff;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .section-title {
+    margin: 20px 0 10px;
+    font-size: 22px;
+    text-shadow: 0 0 12px #3cf;
   }
 
   .game-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+    gap: 18px;
   }
 
   .game-item {
-    background: rgba(0,0,0,0.55);
-    padding: 12px;
-    border-radius: 12px;
+    background: linear-gradient(145deg, rgba(5, 20, 50, 0.9), rgba(0, 0, 0, 0.9));
+    border-radius: 14px;
+    padding: 10px;
     text-align: center;
-    transition: transform 0.2s, box-shadow 0.3s;
-    backdrop-filter: blur(4px);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #3cf;
+    box-shadow: 0 0 18px #3cf55;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  }
+
+  .game-item::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background: radial-gradient(circle at top, #3cf55 0, transparent 60%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
   }
 
   .game-item:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 20px #6af;
+    transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 0 26px #5ff;
+    border-color: #5ff;
   }
 
-  .game-item img {
+  .game-item:hover::before {
+    opacity: 0.35;
+  }
+
+  .game-thumb {
     width: 100%;
-    height: 140px;
-    object-fit: cover;
+    height: 130px;
     border-radius: 10px;
-    margin-bottom: 10px;
-    box-shadow: 0 0 10px #4af;
+    object-fit: cover;
+    margin-bottom: 8px;
+    box-shadow: 0 0 12px #3cf;
   }
 
-  .game-item a {
-    color: #9df;
+  .game-name {
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+
+  .game-meta {
+    font-size: 12px;
+    color: #9fd0ff;
+  }
+
+  .badge-row {
+    margin-top: 6px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid #3cf;
+    background: rgba(3, 10, 30, 0.9);
+    color: #e6f7ff;
+  }
+
+  .badge.recent {
+    border-color: #ff6af5;
+    color: #ffd6ff;
+    box-shadow: 0 0 10px #ff6af5;
+  }
+
+  .game-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #7df;
     text-decoration: none;
-    font-size: 18px;
-    text-shadow: 0 0 10px #4af;
+    text-shadow: 0 0 10px #3cf;
   }
 
-  .game-item a:hover {
+  .game-link:hover {
     text-decoration: underline;
+  }
+
+  /* Loading overlay */
+  #loadingOverlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(0, 40, 80, 0.9), rgba(0, 0, 0, 0.95));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    z-index: 999;
+  }
+
+  .spinner {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 4px solid #0ff;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px #0ff;
+    margin-bottom: 12px;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-text {
+    font-size: 16px;
+    color: #e6f7ff;
+    text-shadow: 0 0 12px #3cf;
+  }
+
+  @media (max-width: 600px) {
+    body {
+      padding: 12px;
+    }
+    h1 {
+      font-size: 32px;
+    }
   }
 </style>
 </head>
 <body>
 
-<h1>Galaxy Game Launcher</h1>
-<input id="search" type="text" placeholder="Search games...">
+<div class="stars"></div>
+div class="stars2"></div>
+<div class="stars3"></div>
 
+<div id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Generating galaxy of games...</div>
+</div>
+
+<h1>Galaxy Game Launcher</h1>
+
+<div class="top-bar">
+  <input id="search" type="text" placeholder="Search games by name...">
+  <select id="categoryFilter" class="filter-select">
+    <option value="all">All categories</option>
+    <option value="Action">Action</option>
+    <option value="Puzzle">Puzzle</option>
+    <option value="Sandbox">Sandbox</option>
+    <option value="Sports">Sports</option>
+    <option value="Fixes">Fixes</option>
+    <option value="Other">Other</option>
+  </select>
+</div>
+
+<div class="section-title">🆕 Recently Added</div>
+<div class="game-list" id="recentList"></div>
+
+<div class="section-title">🎮 All Games</div>
 <div class="game-list" id="gameList"></div>
 
 <script>
-const placeholderImg =
-  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80";
+const placeholderBase =
+  "https://dummyimage.com/400x200/001133/ffffff.png&text=";
 
-function extractImageFromHTML(url) {
-  return fetch(url)
-    .then(r => r.text())
-    .then(html => {
-      const match = html.match(/<img[^>]+src=["']([^"']+)["']/i);
-      return match ? match[1] : placeholderImg;
-    })
-    .catch(() => placeholderImg);
+function prettyName(filename) {
+  const base = filename.replace(/\.html$/i, "");
+  return base
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function guessCategory(name, filename) {
+  const n = (name + " " + filename).toLowerCase();
+  if (n.includes("fix") || n.includes("patch")) return "Fixes";
+  if (n.includes("basketball") || n.includes("soccer") || n.includes("football")) return "Sports";
+  if (n.includes("puzzle") || n.includes("block") || n.includes("2048")) return "Puzzle";
+  if (n.includes("mine") || n.includes("craft") || n.includes("sandbox")) return "Sandbox";
+  if (n.includes("shoot") || n.includes("battle") || n.includes("fight")) return "Action";
+  return "Other";
+}
+
+function iconForGame(name) {
+  const text = encodeURIComponent(name || "Game");
+  return placeholderBase + text;
 }
 
 fetch("https://api.github.com/repos/Lego611091/html/contents")
   .then(res => res.json())
-  .then(async files => {
-    const list = document.getElementById("gameList");
-
+  .then(files => {
     const htmlFiles = files.filter(f => f.name.endsWith(".html"));
 
-    for (const file of htmlFiles) {
-      const item = document.createElement("div");
-      item.className = "game-item";
+    const games = htmlFiles.map((f, index) => {
+      const name = prettyName(f.name);
+      const category = guessCategory(name, f.name);
+      const icon = iconForGame(name);
+      const isRecent = index >= htmlFiles.length - 12; // last 12 as "recent"
+      return {
+        filename: f.name,
+        name,
+        category,
+        icon,
+        isRecent
+      };
+    });
 
-      const img = document.createElement("img");
-      img.src = await extractImageFromHTML(file.name);
+    const gameList = document.getElementById("gameList");
+    const recentList = document.getElementById("recentList");
 
-      const link = document.createElement("a");
-      link.href = file.name;
-      link.textContent = file.name;
+    function renderLists(filterCategory = "all", searchTerm = "") {
+      gameList.innerHTML = "";
+      recentList.innerHTML = "";
 
-      item.appendChild(img);
-      item.appendChild(link);
-      list.appendChild(item);
+      const term = searchTerm.toLowerCase();
+
+      games.forEach(game => {
+        if (filterCategory !== "all" && game.category !== filterCategory) return;
+        if (term && !game.name.toLowerCase().includes(term) &&
+            !game.filename.toLowerCase().includes(term)) return;
+
+        const card = document.createElement("div");
+        card.className = "game-item";
+
+        const img = document.createElement("img");
+        img.className = "game-thumb";
+        img.src = game.icon;
+
+        const title = document.createElement("div");
+        title.className = "game-name";
+        title.textContent = game.name;
+
+        const meta = document.createElement("div");
+        meta.className = "game-meta";
+        meta.textContent = game.category + " • " + game.filename;
+
+        const badges = document.createElement("div");
+        badges.className = "badge-row";
+
+        const catBadge = document.createElement("span");
+        catBadge.className = "badge";
+        catBadge.textContent = game.category;
+        badges.appendChild(catBadge);
+
+        if (game.isRecent) {
+          const recentBadge = document.createElement("span");
+          recentBadge.className = "badge recent";
+          recentBadge.textContent = "Recently Added";
+          badges.appendChild(recentBadge);
+        }
+
+        const link = document.createElement("a");
+        link.className = "game-link";
+        link.href = game.filename;
+        link.textContent = "Play";
+
+        card.appendChild(img);
+        card.appendChild(title);
+        card.appendChild(meta);
+        card.appendChild(badges);
+        card.appendChild(link);
+
+        if (game.isRecent) {
+          recentList.appendChild(card.cloneNode(true));
+        }
+        gameList.appendChild(card);
+      });
     }
 
-    document.getElementById("search").addEventListener("input", function() {
-      const term = this.value.toLowerCase();
-      document.querySelectorAll(".game-item").forEach(item => {
-        const name = item.textContent.toLowerCase();
-        item.style.display = name.includes(term) ? "" : "none";
-      });
+    const searchInput = document.getElementById("search");
+    const categoryFilter = document.getElementById("categoryFilter");
+
+    searchInput.addEventListener("input", () => {
+      renderLists(categoryFilter.value, searchInput.value);
     });
+
+    categoryFilter.addEventListener("change", () => {
+      renderLists(categoryFilter.value, searchInput.value);
+    });
+
+    renderLists();
+
+    document.getElementById("loadingOverlay").style.display = "none";
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("loadingOverlay").style.display = "none";
   });
 </script>
 
