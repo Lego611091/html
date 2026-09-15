@@ -61,7 +61,7 @@
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 18px;
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transition: opacity 1s ease;
   }
 
   .game-item {
@@ -120,6 +120,14 @@
     width: 0%;
     height: 100%;
     background: linear-gradient(90deg, #0ff, #3cf);
+    transition: width 0.2s linear;
+  }
+
+  .percent {
+    margin-top: 10px;
+    font-size: 22px;
+    color: #7df;
+    text-shadow: 0 0 15px #3cf, 0 0 25px #0ff;
   }
 
   .made-by {
@@ -178,6 +186,8 @@
   <div class="loading-bar">
     <div class="loading-fill" id="loadingFill"></div>
   </div>
+
+  <div class="percent" id="percentText">0%</div>
 </div>
 
 <h1>Galaxy Game Launcher</h1>
@@ -225,7 +235,7 @@ async function getNameFromHTML(filename, fallback) {
   }
 }
 
-/* Load games and sync loading bar */
+/* Load games */
 async function loadGames() {
   const res = await fetch("https://api.github.com/repos/Lego611091/html/contents");
   const files = await res.json();
@@ -259,25 +269,35 @@ async function loadGames() {
   }
 
   cards.forEach(card => gameList.appendChild(card));
-  return true;
 }
 
+/* 1-minute loading bar + percent counter */
 async function startLoading() {
   const bar = document.getElementById("loadingFill");
+  const percentText = document.getElementById("percentText");
 
-  const start = performance.now();
-  const loadPromise = loadGames();
-  await loadPromise;
-  const end = performance.now();
+  const totalTime = 60000; // 1 minute
+  const interval = 600; // update every 0.6 seconds (100 updates)
 
-  const loadTime = end - start;
+  let percent = 0;
 
-  bar.style.animation = `fillBar ${loadTime}ms forwards`;
+  const timer = setInterval(() => {
+    percent += 1;
+    bar.style.width = percent + "%";
+    percentText.textContent = percent + "%";
 
-  setTimeout(() => {
-    document.getElementById("loadingOverlay").style.display = "none";
-    document.getElementById("gameList").style.opacity = "1";
-  }, loadTime);
+    if (percent >= 100) {
+      clearInterval(timer);
+      finishLoading();
+    }
+  }, interval);
+
+  await loadGames();
+}
+
+function finishLoading() {
+  document.getElementById("loadingOverlay").style.display = "none";
+  document.getElementById("gameList").style.opacity = "1";
 }
 
 startLoading();
