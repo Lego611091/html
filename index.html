@@ -120,7 +120,7 @@
     width: 0%;
     height: 100%;
     background: linear-gradient(90deg, #0ff, #3cf);
-    transition: width 0.2s linear;
+    transition: width 0.6s linear;
   }
 
   .percent {
@@ -277,7 +277,7 @@ async function startLoading() {
   const percentText = document.getElementById("percentText");
 
   const totalTime = 60000; // 1 minute
-  const interval = 600; // update every 0.6 seconds (100 updates)
+  const interval = totalTime / 100; // 100 updates
 
   let percent = 0;
 
