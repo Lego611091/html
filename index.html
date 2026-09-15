@@ -27,26 +27,10 @@
     pointer-events: none;
     z-index: -1;
   }
-  .stars {
-    background-image: radial-gradient(2px 2px at 20% 20%, #ffffff55, transparent),
-                      radial-gradient(1px 1px at 80% 30%, #7df, transparent),
-                      radial-gradient(1.5px 1.5px at 40% 80%, #4af, transparent);
-    animation: drift 80s linear infinite;
-  }
-  .stars2 {
-    background-image: radial-gradient(2px 2px at 10% 70%, #ffffff55, transparent),
-                      radial-gradient(1px 1px at 60% 40%, #7df, transparent),
-                      radial-gradient(1.5px 1.5px at 90% 10%, #4af, transparent);
-    animation: drift 120s linear infinite;
-    opacity: 0.7;
-  }
-  .stars3 {
-    background-image: radial-gradient(2px 2px at 30% 50%, #ffffff55, transparent),
-                      radial-gradient(1px 1px at 70% 90%, #7df, transparent),
-                      radial-gradient(1.5px 1.5px at 50% 20%, #4af, transparent);
-    animation: drift 160s linear infinite;
-    opacity: 0.4;
-  }
+  .stars { animation: drift 80s linear infinite; }
+  .stars2 { opacity: 0.7; animation: drift 120s linear infinite; }
+  .stars3 { opacity: 0.4; animation: drift 160s linear infinite; }
+
   @keyframes drift {
     from { transform: translate3d(0,0,0); }
     to   { transform: translate3d(-25%, -25%, 0); }
@@ -120,12 +104,6 @@
     justify-content: center;
     flex-direction: column;
     z-index: 999;
-    animation: fadeOut 1s ease forwards;
-    animation-delay: 3s;
-  }
-
-  @keyframes fadeOut {
-    to { opacity: 0; visibility: hidden; }
   }
 
   .loading-bar {
@@ -142,11 +120,6 @@
     width: 0%;
     height: 100%;
     background: linear-gradient(90deg, #0ff, #3cf);
-    animation: fillBar 3s ease forwards;
-  }
-
-  @keyframes fillBar {
-    to { width: 100%; }
   }
 
   .made-by {
@@ -154,12 +127,6 @@
     margin-top: 10px;
     color: #7df;
     text-shadow: 0 0 15px #3cf, 0 0 25px #0ff;
-    animation: fadeInMadeBy 2s ease forwards;
-    opacity: 0;
-  }
-
-  @keyframes fadeInMadeBy {
-    to { opacity: 1; }
   }
 
   .cutscene {
@@ -209,7 +176,7 @@
   <div class="made-by">Made by Logan</div>
 
   <div class="loading-bar">
-    <div class="loading-fill"></div>
+    <div class="loading-fill" id="loadingFill"></div>
   </div>
 </div>
 
@@ -220,10 +187,10 @@
 <div class="game-list" id="gameList"></div>
 
 <script>
+document.getElementById("startupSound").play();
+
 const fallbackImg =
   "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=800&q=80";
-
-document.getElementById("startupSound").play();
 
 /* Find cover image */
 async function findCover(base) {
@@ -258,12 +225,8 @@ async function getNameFromHTML(filename, fallback) {
   }
 }
 
-/* Load ALL games at once AFTER loading bar finishes */
-setTimeout(async () => {
-  // make sure overlay is gone so grid is visible
-  const overlay = document.getElementById("loadingOverlay");
-  overlay.style.display = "none";
-
+/* Load games and sync loading bar */
+async function loadGames() {
   const res = await fetch("https://api.github.com/repos/Lego611091/html/contents");
   const files = await res.json();
   const htmlFiles = files.filter(f => f.name.endsWith(".html"));
@@ -296,9 +259,28 @@ setTimeout(async () => {
   }
 
   cards.forEach(card => gameList.appendChild(card));
-  gameList.style.opacity = "1";
+  return true;
+}
 
-}, 3000); // matches loading bar + cutscene
+async function startLoading() {
+  const bar = document.getElementById("loadingFill");
+
+  const start = performance.now();
+  const loadPromise = loadGames();
+  await loadPromise;
+  const end = performance.now();
+
+  const loadTime = end - start;
+
+  bar.style.animation = `fillBar ${loadTime}ms forwards`;
+
+  setTimeout(() => {
+    document.getElementById("loadingOverlay").style.display = "none";
+    document.getElementById("gameList").style.opacity = "1";
+  }, loadTime);
+}
+
+startLoading();
 
 /* Search */
 document.getElementById("search").addEventListener("input", function() {
